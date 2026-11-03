@@ -5,8 +5,8 @@
 </style></head><body>
 <header><h1>🌿 Sahabat Sehat Ibu</h1><div>Langkah kecil hari ini, bekal sehat untuk hari esok.</div></header>
 <main>
-<section id="auth" class="authbox"><h2>Akses Sahabat Sehat Ibu</h2><p>Masuk menggunakan email yang terdaftar. Kode OTP akan dikirim ke email Anda.</p>
-<form id="sendForm"><label for="email">Email terdaftar</label><input id="email" type="email" autocomplete="email" required placeholder="nama@email.com"><button class="primary" type="submit">Kirim kode OTP</button></form>
+<section id="auth" class="authbox"><h2>Akses Sahabat Sehat Ibu</h2><p>Masuk menggunakan email yang terdaftar. Kami akan mengirim tautan masuk ke email Anda. Tidak perlu memasukkan kode.</p>
+<form id="sendForm"><label for="email">Email terdaftar</label><input id="email" type="email" autocomplete="email" required placeholder="nama@email.com"><button class="primary" type="submit">Kirim tautan masuk</button></form>
 <div id="authStatus" class="status" role="status">Akses hanya untuk email yang sudah terdaftar dan memiliki hak akses aktif.</div></section>
 <div id="app" class="hidden">
 <section class="welcome"><h2>Selamat datang!</h2><p>Mulai dari kebiasaan sederhana. Pilih makanan beragam, bergerak sesuai kemampuan, dan catat kemajuan tanpa terburu-buru.</p><p id="signedIn" class="muted"></p><button id="logout">Keluar</button></section>
@@ -16,7 +16,7 @@
 <section id="aktivitas" class="page"><h2>Aktivitas Fisik</h2><div class="card"><h3>🚶 Jalan santai</h3><p>Mulai 5–10 menit bila sesuai kemampuan.</p><label class="check"><input type="checkbox" data-k="act_walk"> Saya melakukan jalan santai.</label><h3>🪑 Gerak di kursi</h3><p>Gerakkan bahu, tangan, dan pergelangan kaki perlahan sambil duduk stabil.</p><label class="check"><input type="checkbox" data-k="act_chair"> Saya melakukan gerak di kursi.</label><h3>🧘 Peregangan ringan</h3><p>Lakukan perlahan dan hentikan bila nyeri.</p><label class="check"><input type="checkbox" data-k="act_stretch"> Saya melakukan peregangan ringan.</label></div><p class="muted">Hentikan aktivitas dan cari pertolongan medis bila muncul nyeri dada, sesak berat, atau pusing hebat. Konsultasikan aktivitas bila memiliki penyakit kronis atau keterbatasan gerak.</p></section>
 <section id="rencana" class="page"><h2>Rencana Sehat 30 Hari</h2><div class="card"><label>Tanggal <input type="date" id="date"></label><label class="check"><input type="checkbox" data-k="m"> Saya memilih makanan beragam.</label><label class="check"><input type="checkbox" data-k="a"> Saya bergerak sesuai kemampuan.</label><label class="check"><input type="checkbox" data-k="i"> Saya memberi waktu untuk istirahat.</label><p>Catatan hari ini</p><textarea id="notes" rows="3" style="width:100%"></textarea><p><button class="primary" id="save">Simpan catatan</button></p><p id="saveStatus" class="muted" aria-live="polite"></p></div></section>
 <section id="panduan" class="page"><h2>Buku & Panduan</h2><div class="card"><p>Panduan kebiasaan sehat: makanan beragam, aktivitas sesuai kemampuan, tidur cukup, dan pemeriksaan berkala sesuai usia serta faktor risiko.</p><p>Materi edukasi terperinci perlu ditinjau tenaga kesehatan dan dilengkapi referensi resmi sebelum rilis komersial.</p></div></section>
-</div></main><footer class="muted" style="text-align:center;padding:20px">© Sahabat Sehat Ibu</footer><!-- footer-clean-build -->
+</div></main><footer class="muted" style="text-align:center;padding:20px">© Sahabat Sehat Ibu</footer>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.0';
 const SUPABASE_URL='https://ofsrnyrzyzvtgzuiphse.supabase.co';
@@ -38,12 +38,12 @@ sendForm.addEventListener('submit',async e=>{
  message('Mengirim link login…');
  const {error}=await supabase.auth.signInWithOtp({email,options:{shouldCreateUser:false,emailRedirectTo:window.location.origin}});
  if(error){message('Belum dapat mengirim link login: '+error.message);return}
- message('Jika email terdaftar dan diizinkan, link login sudah dikirim. Buka email ini pada perangkat yang sama, lalu ketuk link tersebut. Periksa juga folder spam.');
+ message('Jika email terdaftar dan memiliki hak akses aktif, tautan masuk akan dikirim ke email Anda. Buka email pada perangkat yang sama, lalu ketuk tautan tersebut. Periksa juga folder spam.');
 });
 supabase.auth.onAuthStateChange((event,session)=>{
  if(session?.user && (event==='SIGNED_IN'||event==='INITIAL_SESSION'||event==='TOKEN_REFRESHED')) setTimeout(()=>showAppForUser(session.user),0);
 });
-$('logout').onclick=async()=>{await supabase.auth.signOut();app.classList.add('hidden');authBox.classList.remove('hidden');message('Anda sudah keluar. Masukkan email untuk meminta link login baru.');};
+$('logout').onclick=async()=>{await supabase.auth.signOut();app.classList.add('hidden');authBox.classList.remove('hidden');message('Anda sudah keluar. Masukkan email untuk meminta tautan masuk baru.');};
 const pages=[...document.querySelectorAll('.page')],tabs=[...document.querySelectorAll('nav button')];function show(id){pages.forEach(p=>p.classList.toggle('active',p.id===id));tabs.forEach(b=>b.setAttribute('aria-current',String(b.dataset.page===id)))}tabs.forEach(b=>b.onclick=()=>show(b.dataset.page));
 const date=$('date');function localDate(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}date.value=localDate();
 async function loadProgress(){const {data,error}=await supabase.from('plan_progress').select('checklist,notes').eq('plan_date',date.value).maybeSingle();if(error){$('saveStatus').textContent='Data belum dapat dimuat: '+error.message;return}const v=data||{};document.querySelectorAll('[data-k]').forEach(c=>c.checked=!!(v.checklist||{})[c.dataset.k]);$('notes').value=v.notes||''}
