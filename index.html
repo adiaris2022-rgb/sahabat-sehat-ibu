@@ -95,7 +95,7 @@ const mealLibrary=[
 {b:'Ubi rebus, tempe, buah',l:'Nasi, telur kukus, sayur asem',d:'Tahu-tempe, capcay kuah, nasi',s:'Pepaya',k:[330,540,460,80]}
 ]
 ];
-let selectedDay=0,optionIndex=Array(7).fill(0);
+let selectedDay=(new Date().getDay()+6)%7,optionIndex=Array(7).fill(0);
 const chosenMenus=JSON.parse(localStorage.getItem('ssibuChosenMenus')||'{}');
 function adaptMeal(meal,pref){
  const x={...meal,k:[...meal.k]};
