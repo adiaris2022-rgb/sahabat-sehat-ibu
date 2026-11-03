@@ -22,7 +22,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.0';
 const SUPABASE_URL='https://ofsrnyrzyzvtgzuiphse.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_dXJV0yhSqlxLJhCfMTFjsw_skk4aWGp';
-const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id),authBox=$('auth'),app=$('app'),sendForm=$('sendForm'),verifyForm=$('verifyForm'),authStatus=$('authStatus');
 let pendingEmail='';
 function message(t){authStatus.textContent=t}
