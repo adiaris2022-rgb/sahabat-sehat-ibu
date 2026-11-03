@@ -4,7 +4,9 @@ MVP aplikasi pendamping kebiasaan sehat dengan antarmuka responsif untuk ponsel.
 
 ## Fitur yang tersedia pada source saat ini
 - Beranda, Menu Makan, Aktivitas, Rencana Sehat 30 Hari, Buku & Panduan.
-- Login passwordless menggunakan email OTP 6 digit melalui Supabase Auth.
+- Checklist belanja bahan makanan dan aktivitas harian tersimpan bersama catatan rencana berdasarkan tanggal.
+- Ringkasan jumlah hari dengan aktivitas tercatat dalam 30 hari terakhir.
+- Login passwordless menggunakan tautan Magic Link sekali pakai melalui email (tanpa memasukkan kode OTP).
 - Permintaan OTP menggunakan `shouldCreateUser: false` (tidak membuka pendaftaran mandiri).
 - Setelah OTP diverifikasi, aplikasi memeriksa entitlement aktif untuk produk `sahabat-sehat-ibu` berdasarkan `user_id`.
 - Checklist dan catatan rencana 30 hari disimpan ke tabel Supabase `plan_progress`.
@@ -20,8 +22,8 @@ MVP aplikasi pendamping kebiasaan sehat dengan antarmuka responsif untuk ponsel.
 Hubungkan repository ini ke Netlify. Build command kosong; publish directory `.`. Setelah deploy, uji URL produksi melalui ponsel.
 
 ## Pekerjaan wajib sebelum peluncuran komersial
-1. Konfigurasikan template email Supabase agar mengirim OTP token (`{{ .Token }}`), bukan confirmation URL/magic link, lalu atur masa berlaku/rate limit sesuai kebutuhan. Pengaturan template dan masa berlaku belum dapat diubah melalui koneksi yang tersedia dan perlu diselesaikan di Dashboard.
-2. Uji OTP untuk email terdaftar dan tidak terdaftar; uji expiry, penggunaan ulang, dan pembatasan percobaan.
+1. Pastikan template Magic Link Supabase mengirim tautan masuk yang benar, Site URL dan Redirect URLs sesuai domain produksi, serta masa berlaku dan rate limit sesuai kebutuhan.
+2. Uji Magic Link untuk email terdaftar dan tidak terdaftar; uji expiry, penggunaan ulang, dan pembatasan permintaan.
 3. Uji entitlement aktif, kedaluwarsa, dicabut, dan tidak ada entitlement.
 4. Verifikasi RLS untuk seluruh tabel, termasuk akses lintas pengguna. RLS untuk `plan_progress` dan `health_preferences` sudah diperketat agar hanya akun dengan entitlement aktif yang dapat membaca/menulis datanya; SQL tercatat di `supabase/migrations/20261103000000_require_active_entitlement_for_user_data.sql`.
 5. Buat alur admin/server untuk mengaktifkan entitlement setelah pembayaran terverifikasi. Jangan percaya status pembayaran dari frontend.
