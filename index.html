@@ -23,16 +23,29 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.0';
 const SUPABASE_URL='https://ofsrnyrzyzvtgzuiphse.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_dXJV0yhSqlxLJhCfMTFjsw_skk4aWGp';
 const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-const $=id=>document.getElementById(id),authBox=$('auth'),app=$('app'),sendForm=$('sendForm'),verifyForm=$('verifyForm'),authStatus=$('authStatus');
+const $=id=>document.getElementById(id),authBox=$('auth'),app=$('app'),sendForm=$('sendForm'),authStatus=$('authStatus');
 let pendingEmail='';
 function message(t){authStatus.textContent=t}
-sendForm.addEventListener('submit',async e=>{e.preventDefault();pendingEmail=$('email').value.trim().toLowerCase();message('Mengirim kode OTP…');const {error}=await supabase.auth.signInWithOtp({email:pendingEmail,options:{shouldCreateUser:false}});if(error){message('Belum dapat mengirim OTP: '+error.message);return}verifyForm.classList.remove('hidden');message('Jika email terdaftar dan diizinkan, kode OTP akan dikirim. Periksa inbox dan folder spam.');});
-verifyForm.addEventListener('submit',async e=>{e.preventDefault();const token=$('otp').value.trim();if(!/^\d{6}$/.test(token)){message('Masukkan OTP 6 digit.');return}message('Memverifikasi kode…');const {data,error}=await supabase.auth.verifyOtp({email:pendingEmail,token,type:'email'});if(error){message('OTP tidak valid atau kedaluwarsa: '+error.message);return}const user=data.user;if(!user){message('Akun tidak ditemukan.');await supabase.auth.signOut();return}
-const {data:ent,error:entErr}=await supabase.from('access_entitlements').select('id,status,starts_at,expires_at').eq('user_id',user.id).eq('product_code','sahabat-sehat-ibu').eq('status','active').limit(10);
-const now=Date.now(),allowed=!entErr&&(ent||[]).some(x=>(!x.starts_at||Date.parse(x.starts_at)<=now)&&(!x.expires_at||Date.parse(x.expires_at)>now));
-if(!allowed){await supabase.auth.signOut();message(entErr?'Tidak dapat memeriksa hak akses. Silakan coba lagi.':'Email berhasil diverifikasi, tetapi belum ada hak akses aktif untuk produk ini. Hubungi admin/penjual.');return}
-$('signedIn').textContent='Masuk sebagai '+(user.email||pendingEmail);authBox.classList.add('hidden');app.classList.remove('hidden');await loadProgress();});
-$('logout').onclick=async()=>{await supabase.auth.signOut();app.classList.add('hidden');authBox.classList.remove('hidden');verifyForm.classList.add('hidden');$('otp').value='';pendingEmail='';message('Anda sudah keluar. Masukkan email untuk meminta OTP baru.');};
+let checkingSession=false;
+async function showAppForUser(user){
+ if(checkingSession)return; checkingSession=true;
+ const {data:ent,error:entErr}=await supabase.from('access_entitlements').select('id,status,starts_at,expires_at').eq('user_id',user.id).eq('product_code','sahabat-sehat-ibu').eq('status','active').limit(10);
+ const now=Date.now(),allowed=!entErr&&(ent||[]).some(x=>(!x.starts_at||Date.parse(x.starts_at)<=now)&&(!x.expires_at||Date.parse(x.expires_at)>now));
+ if(!allowed){await supabase.auth.signOut();message(entErr?'Tidak dapat memeriksa hak akses. Silakan coba lagi.':'Email berhasil diverifikasi, tetapi belum ada hak akses aktif untuk produk ini. Hubungi admin/penjual.');checkingSession=false;return}
+ $('signedIn').textContent='Masuk sebagai '+(user.email||'email terverifikasi');authBox.classList.add('hidden');app.classList.remove('hidden');await loadProgress();checkingSession=false;
+}
+sendForm.addEventListener('submit',async e=>{
+ e.preventDefault();
+ const email=$('email').value.trim().toLowerCase();
+ message('Mengirim link login…');
+ const {error}=await supabase.auth.signInWithOtp({email,options:{shouldCreateUser:false,emailRedirectTo:window.location.origin}});
+ if(error){message('Belum dapat mengirim link login: '+error.message);return}
+ message('Jika email terdaftar dan diizinkan, link login sudah dikirim. Buka email ini pada perangkat yang sama, lalu ketuk link tersebut. Periksa juga folder spam.');
+});
+supabase.auth.onAuthStateChange((event,session)=>{
+ if(session?.user && (event==='SIGNED_IN'||event==='INITIAL_SESSION'||event==='TOKEN_REFRESHED')) setTimeout(()=>showAppForUser(session.user),0);
+});
+$('logout').onclick=async()=>{await supabase.auth.signOut();app.classList.add('hidden');authBox.classList.remove('hidden');message('Anda sudah keluar. Masukkan email untuk meminta link login baru.');};
 const pages=[...document.querySelectorAll('.page')],tabs=[...document.querySelectorAll('nav button')];function show(id){pages.forEach(p=>p.classList.toggle('active',p.id===id));tabs.forEach(b=>b.setAttribute('aria-current',String(b.dataset.page===id)))}tabs.forEach(b=>b.onclick=()=>show(b.dataset.page));
 const date=$('date');date.value=new Date().toISOString().slice(0,10);
 async function loadProgress(){const {data,error}=await supabase.from('plan_progress').select('checklist,notes').eq('plan_date',date.value).maybeSingle();if(error){$('saveStatus').textContent='Data belum dapat dimuat.';return}const v=data||{};document.querySelectorAll('[data-k]').forEach(c=>c.checked=!!(v.checklist||{})[c.dataset.k]);$('notes').value=v.notes||''}
