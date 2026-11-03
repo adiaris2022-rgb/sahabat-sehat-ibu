@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#176b55">
+<title>Sahabat Sehat Ibu</title>
+<style>
+:root{--green:#176b55;--pale:#eaf5ef;--ink:#24352e;--line:#dce8e1}
+*{box-sizing:border-box}body{margin:0;background:#fbfdfb;color:var(--ink);font:18px/1.55 system-ui,sans-serif}
+header{background:var(--green);color:white;padding:22px max(18px,calc((100% - 900px)/2))}
+main{max-width:900px;margin:auto;padding:16px}.welcome,.card{padding:18px;border-radius:16px;margin:12px 0}
+.welcome{background:var(--pale)}.card{background:white;border:1px solid var(--line)}
+nav{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:16px 0}
+button{font:inherit;border:1px solid var(--line);border-radius:12px;padding:12px;background:white;cursor:pointer}
+button[aria-current=true],.primary{background:var(--green);color:white}.page{display:none}.page.active{display:block}
+label.check{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+input[type=checkbox]{width:24px;height:24px}textarea,input{font:inherit;padding:10px;border:1px solid #b9ccc1;border-radius:9px;max-width:100%}
+.muted{color:#60716a;font-size:16px}@media(max-width:600px){nav{grid-template-columns:repeat(2,1fr)}body{font-size:17px}}
+</style></head><body>
+<header><h1>🌿 Sahabat Sehat Ibu</h1><div>Langkah kecil hari ini, bekal sehat untuk hari esok.</div></header>
+<main><section class="welcome"><h2>Selamat datang!</h2><p>Mulai dari kebiasaan sederhana. Pilih makanan beragam, bergerak sesuai kemampuan, dan catat kemajuan tanpa terburu-buru.</p></section>
+<nav><button data-page="home" aria-current="true">🏠 Beranda</button><button data-page="makan">🥗 Menu Makan</button><button data-page="aktivitas">🚶 Aktivitas</button><button data-page="rencana">📅 Rencana 30 Hari</button><button data-page="panduan">📖 Buku & Panduan</button></nav>
+<section id="home" class="page active"><div class="card"><h3>Mulai hari ini</h3><p>Gunakan menu di atas untuk melihat inspirasi makanan, aktivitas ringan, dan rencana kebiasaan sehat.</p></div><div class="card"><b>Catatan:</b> Aplikasi ini untuk edukasi dan pembentukan kebiasaan, bukan alat diagnosis atau pengganti dokter.</div></section>
+<section id="makan" class="page"><h2>Menu Makan</h2><p class="muted">Contoh umum; sesuaikan dengan kondisi kesehatan, alergi, kebutuhan gizi, dan arahan tenaga kesehatan.</p><div class="card"><p>🌅 Sarapan: oat atau nasi secukupnya, telur, dan buah.</p><p>☀️ Siang: nasi, ikan/tempe, sayur, dan buah.</p><p>🌙 Malam: sup sayur dengan protein dan sumber karbohidrat sesuai kebutuhan.</p><h3>Daftar belanja</h3><label class="check"><input type="checkbox"> Sayuran beragam</label><label class="check"><input type="checkbox"> Buah</label><label class="check"><input type="checkbox"> Ikan, telur, tahu, atau tempe</label></div></section>
+<section id="aktivitas" class="page"><h2>Aktivitas Fisik</h2><div class="card"><h3>🚶 Jalan santai</h3><p>Mulai 5–10 menit bila sesuai kemampuan.</p><h3>🪑 Gerak di kursi</h3><p>Gerakkan bahu, tangan, dan pergelangan kaki perlahan sambil duduk stabil.</p><h3>🧘 Peregangan ringan</h3><p>Lakukan perlahan dan hentikan bila nyeri.</p></div><p class="muted">Hentikan aktivitas dan cari pertolongan medis bila muncul nyeri dada, sesak berat, atau pusing hebat. Konsultasikan aktivitas bila memiliki penyakit kronis atau keterbatasan gerak.</p></section>
+<section id="rencana" class="page"><h2>Rencana Sehat 30 Hari</h2><div class="card"><label>Tanggal <input type="date" id="date"></label><label class="check"><input type="checkbox" data-k="m"> Saya memilih makanan beragam.</label><label class="check"><input type="checkbox" data-k="a"> Saya bergerak sesuai kemampuan.</label><label class="check"><input type="checkbox" data-k="i"> Saya memberi waktu untuk istirahat.</label><p>Catatan hari ini</p><textarea id="notes" rows="3"></textarea><p><button class="primary" id="save">Simpan catatan</button></p><p id="status" class="muted" aria-live="polite"></p></div></section>
+<section id="panduan" class="page"><h2>Buku & Panduan</h2><div class="card"><p>Panduan kebiasaan sehat: makanan beragam, aktivitas sesuai kemampuan, tidur cukup, dan pemeriksaan berkala sesuai usia serta faktor risiko.</p><p>Materi edukasi terperinci perlu ditinjau tenaga kesehatan dan dilengkapi referensi resmi sebelum rilis komersial.</p></div></section></main>
+<footer class="muted" style="text-align:center;padding:20px">© Sahabat Sehat Ibu · Prototipe MVP</footer>
+<script>
+const pages=[...document.querySelectorAll('.page')],tabs=[...document.querySelectorAll('nav button')];
+function show(id){pages.forEach(p=>p.classList.toggle('active',p.id===id));tabs.forEach(b=>b.setAttribute('aria-current',String(b.dataset.page===id)))}
+tabs.forEach(b=>b.onclick=()=>show(b.dataset.page));
+const date=document.getElementById('date');date.value=new Date().toISOString().slice(0,10);
+function load(){let v={};try{v=JSON.parse(localStorage.getItem('ssi-'+date.value)||'{}')}catch(e){}document.querySelectorAll('[data-k]').forEach(c=>c.checked=!!v[c.dataset.k]);document.getElementById('notes').value=v.notes||''}
+date.onchange=load;document.getElementById('save').onclick=()=>{let v={notes:document.getElementById('notes').value};document.querySelectorAll('[data-k]').forEach(c=>v[c.dataset.k]=c.checked);localStorage.setItem('ssi-'+date.value,JSON.stringify(v));document.getElementById('status').textContent='Catatan tersimpan di browser perangkat ini.'};load();
+</script></body></html>
