@@ -1,0 +1,9 @@
+{
+  "name": "sahabat-sehat-ibu",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aplikasi pendamping kebiasaan sehat",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}
