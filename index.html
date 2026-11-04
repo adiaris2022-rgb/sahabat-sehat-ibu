@@ -127,7 +127,6 @@ function renderMenu(){
  $('selectedMenu').innerHTML='<b>Menu yang dipilih:</b> '+(saved?('Alternatif '+(saved.option+1)+' · '+saved.date):'Belum ada pilihan tersimpan untuk hari ini.')+'<p class="small muted">Pilihan disimpan pada perangkat ini.</p>';
  $('currentMenu').innerHTML='<h3>Rangkuman alternatif terpilih</h3><p>🌅 <b>Sarapan:</b> '+current.b+'</p><p>☀️ <b>Makan siang:</b> '+current.l+'</p><p>🌙 <b>Makan malam:</b> '+current.d+'</p><p>🍎 <b>Selingan:</b> '+current.s+'</p><span class="pill">Estimasi total '+total+' kkal</span><p class="small muted">Estimasi kasar per porsi. Kebutuhan energi setiap orang berbeda.</p>';
 }
-$('makeMenu').onclick=()=>{optionIndex[selectedDay]=(optionIndex[selectedDay]+1)%3;renderMenu()};
 $('nextMenu').onclick=()=>{optionIndex[selectedDay]=(optionIndex[selectedDay]+1)%3;renderMenu()};
 $('saveMenu').onclick=()=>{chosenMenus[dayNames[selectedDay]]={option:optionIndex[selectedDay],date:new Date().toLocaleDateString('id-ID')};localStorage.setItem('ssibuChosenMenus',JSON.stringify(chosenMenus));renderMenu();$('selectedMenu').scrollIntoView({behavior:'smooth',block:'nearest'});};
 $('foodPref').addEventListener('change',()=>{optionIndex=Array(7).fill(0);renderMenu()});
